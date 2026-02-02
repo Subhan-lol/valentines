@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Be My Valentine? 💖</title>
+
+<style>
+  :root {
+    --bg: #ff4d6d;
+    --card: #fff0f3;
+    --yes: #38b000;
+    --no: #ffd6dc;
+    --text: #590d22;
+  }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-family: "Comic Sans MS", "Arial Rounded MT Bold", sans-serif;
+    overflow: hidden;
+  }
+
+  .wrapper {
+    display: flex;
+    align-items: center;
+    gap: 30px;
+  }
+
+  .side-img {
+    width: 120px;
+    animation: float 3s ease-in-out infinite;
+  }
+
+  .side-img.right {
+    animation-delay: 1.5s;
+  }
+
+  @keyframes float {
+    0%,100% { transform: translateY(0); }
+    50% { transform: translateY(-15px); }
+  }
+
+  .card {
+    background: var(--card);
+    padding: 45px 50px;
+    border-radius: 28px;
+    text-align: center;
+    box-shadow: 0 20px 40px rgba(0,0,0,.25);
+    width: 360px;
+    height: 320px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  h1 {
+    color: var(--text);
+    margin-bottom: 30px;
+    font-size: 28px;
+  }
+
+  .buttons {
+    position: relative;
+    width: 100%;
+    height: 180px;
+    overflow: hidden;
+  }
+
+  button {
+    border: none;
+    border-radius: 16px;
+    padding: 16px 28px;
+    font-size: 18px;
+    cursor: pointer;
+    position: absolute;
+    transition: all .3s ease;
+    white-space: nowrap;
+  }
+
+  #yesBtn {
+    background: var(--yes);
+    color: white;
+    left: 20%;
+    top: 50%;
+    transform: translateY(-50%);
+  }
+
+  #noBtn {
+    background: var(--no);
+    left: 80%;
+    top: 50%;
+    transform: translateY(-50%);
+  }
+
+  .heart {
+    position: fixed;
+    bottom: -20px;
+    font-size: 18px;
+    animation: rise 4s linear forwards;
+    pointer-events: none;
+  }
+
+  @keyframes rise {
+    to {
+      transform: translateY(-110vh) translateX(var(--x));
+      opacity: 0;
+    }
+  }
+</style>
+</head>
+<body>
+
+<img id="leftImg" class="side-img" src="something.jpg" alt="">
+<div class="wrapper">
+  <div class="card">
+    <h1>Will you be my Valentine? 💘</h1>
+    <div class="buttons" id="buttonArea">
+      <button id="yesBtn">Yes 💖</button>
+      <button id="noBtn">No</button>
+    </div>
+  </div>
+</div>
+<img id="rightImg" class="side-img right" src="something.jpg" alt="">
+
+<script>
+/* ===== IMAGE PATHS ===== */
+const LEFT_IMAGE_PATH = "something.jpg";
+const RIGHT_IMAGE_PATH = "something.jpg";
+document.getElementById("leftImg").src = LEFT_IMAGE_PATH;
+document.getElementById("rightImg").src = RIGHT_IMAGE_PATH;
+
+const yesBtn = document.getElementById("yesBtn");
+const noBtn = document.getElementById("noBtn");
+const area = document.getElementById("buttonArea");
+
+let noScale = 1;
+let noIndex = 0;
+
+/* No messages */
+const noMessages = [
+  "No", "Are you sure? 🥺", "Really sure?", "Please 💔",
+  "This hurts 😢", "Why 😭", "I’m trying my best", "STOP clicking me",
+  "I’m scared", "Okay bye…", "OKAY BITCH" , "SORRY", "BYEE"
+];
+
+/* HEART PARTICLES */
+function spawnHeart(x = Math.random() * window.innerWidth) {
+  const heart = document.createElement("div");
+  heart.className = "heart";
+  heart.textContent = "💖";
+  heart.style.left = x + "px";
+  heart.style.setProperty("--x", (Math.random()*80 - 40) + "px");
+  document.body.appendChild(heart);
+  setTimeout(() => heart.remove(), 4000);
+}
+setInterval(() => spawnHeart(), 600);
+
+/* ===== DECORATIVE IMAGES ===== */
+const decorativeImages = [
+  "first.png",
+  "second.png",
+  "third.png",
+  "fourth.png"
+];
+
+const decoContainer = document.createElement("div");
+decoContainer.style.position = "fixed";
+decoContainer.style.top = "0";
+decoContainer.style.left = "0";
+decoContainer.style.width = "100%";
+decoContainer.style.height = "100%";
+decoContainer.style.pointerEvents = "none";
+document.body.appendChild(decoContainer);
+
+// track existing deco positions to avoid overlap
+const decoPositions = [];
+
+function spawnDecoImage() {
+  if(decorativeImages.length===0) return;
+  const img = document.createElement("img");
+  img.src = decorativeImages[Math.floor(Math.random()*decorativeImages.length)];
+  img.style.position = "absolute";
+
+  const card = document.querySelector(".card");
+  const cardRect = card.getBoundingClientRect();
+  const margin = 20;
+  let size = 20 + Math.random()*40; // larger sizes over time
+
+  // Find a spot without overlapping existing
+  let x, y, tries = 0;
+  do {
+    x = Math.random() * (window.innerWidth - size);
+    if(x > cardRect.left && x < cardRect.right) x += (cardRect.right - cardRect.left);
+    if(x > window.innerWidth - size) x = margin;
+
+    y = Math.random() * (window.innerHeight - size);
+
+    var overlap = decoPositions.some(pos => {
+      return !(x + size < pos.x || x > pos.x + pos.size || y + size < pos.y || y > pos.y + pos.size);
+    });
+    tries++;
+  } while(overlap && tries<30);
+
+  decoPositions.push({x, y, size});
+  img.style.left = x + "px";
+  img.style.top = y + "px";
+  img.style.width = size + "px";
+  img.style.height = "auto";
+
+  const animSpeed = 2 + Math.random()*3;
+  img.animate([
+    { transform: "translateY(0px)" },
+    { transform: `translateY(${10 + Math.random()*20}px)` },
+    { transform: "translateY(0px)" }
+  ], { duration: animSpeed*1000, iterations: Infinity, easing: "ease-in-out" });
+
+  decoContainer.appendChild(img);
+  setTimeout(() => img.remove(), 20000);
+}
+
+setInterval(() => spawnDecoImage(), 800); // spawn frequently
+
+/* ===== NO BUTTON LOGIC ===== */
+noBtn.addEventListener("click", () => {
+  const areaRect = area.getBoundingClientRect();
+  const yesRect = yesBtn.getBoundingClientRect();
+  const btnRect = noBtn.getBoundingClientRect();
+  const padding = 5;
+
+  noBtn.textContent = noMessages[Math.min(noIndex, noMessages.length-1)];
+  noIndex++;
+  noScale -= 0.05;
+  noBtn.style.transform = `translateY(-50%) scale(${noScale})`;
+
+  // Move No button in right half avoiding Yes
+  let x, y, attempts = 0;
+  do {
+    x = Math.random() * (areaRect.width/2 - btnRect.width - padding*2) + areaRect.width/2 + padding;
+    y = Math.random() * (areaRect.height - btnRect.height - 2*padding) + padding;
+
+    const noLeft = areaRect.left + x;
+    const noRight = noLeft + btnRect.width;
+    const noTop = areaRect.top + y;
+    const noBottom = noTop + btnRect.height;
+
+    const overlap = !(noRight < yesRect.left || noLeft > yesRect.right || noBottom < yesRect.top || noTop > yesRect.bottom);
+
+    attempts++;
+    if(!overlap || attempts>30) break;
+  } while(true);
+
+  noBtn.style.left = x + "px";
+  noBtn.style.top = y + "px";
+
+  spawnHeart(areaRect.left + x);
+
+  if(noScale <= 0.2) noBtn.remove();
+
+  // YES BUTTON MOVES TO CENTER AND FILLS CARD
+  const cardWidth = area.clientWidth;
+  const cardHeight = area.clientHeight;
+
+  // Move slowly to center
+  let yesCurrentLeft = parseFloat(yesBtn.style.left);
+  yesBtn.style.left = yesCurrentLeft + (50 - yesCurrentLeft)*0.1 + "%";
+
+  // Increase width and height toward card bounds
+  const newWidth = Math.min(yesBtn.offsetWidth + 25, cardWidth - 20);
+  const newHeight = Math.min(yesBtn.offsetHeight + 15, cardHeight - 20);
+  yesBtn.style.width = newWidth + "px";
+  yesBtn.style.height = newHeight + "px";
+
+  yesBtn.style.top = "50%";
+  yesBtn.style.transform = "translate(-50%, -50%)";
+});
+
+/* ===== YES CLICK ===== */
+yesBtn.addEventListener("click", () => {
+  document.body.innerHTML = `
+    <div style="
+      background:#ff4d6d;
+      height:100vh;
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      text-align:center;
+      color:white;
+      font-family:'Comic Sans MS',sans-serif;
+      padding:30px;
+    ">
+      <div>
+        <h1 style="font-size:50px;">YAYYYYY 💖🥰</h1>
+        <p style="font-size:28px;">Best choice ever 💞</p>
+      </div>
+    </div>
+  `;
+});
+</script>
+
+</body>
+</html>
